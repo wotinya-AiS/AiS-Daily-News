@@ -70,9 +70,8 @@
             text-decoration: none;
             font-weight: bold;
             box-shadow: 0 4px 15px rgba(0,0,0,0.4);
-            z-index: 100;
         }
-        .loading {
+        .loading, .error {
             text-align: center;
             padding: 40px;
             color: #888;
@@ -93,42 +92,46 @@
 
     <script>
         async function loadNews() {
-            const feeds = [
-                "https://feeds.bbci.co.uk/news/rss.xml",
-                "https://rss.nytimes.com/services/xml/rss/nyt/World.xml",
-                "https://techcrunch.com/feed/",
-                "https://rss.reuters.com/rss/worldNews"
-            ];
+            const container = document.getElementById('news-container');
+            container.innerHTML = '<div class="loading">Loading latest news...</div>';
 
-            let allHtml = '';
+            try {
+                const feeds = [
+                    "https://feeds.bbci.co.uk/news/rss.xml",
+                    "https://rss.nytimes.com/services/xml/rss/nyt/World.xml"
+                ];
 
-            for (let url of feeds) {
-                try {
-                    const res = await fetch(`https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(url)}`);
-                    const data = await res.json();
+                let html = '';
 
-                    if (data.items && data.items.length > 0) {
-                        data.items.slice(0, 6).forEach(item => {
-                            const image = item.enclosure?.link || item.thumbnail || 'https://via.placeholder.com/600x300/1a1a1a/0f0?text=News';
-                            allHtml += `
-                                <div class="article">
-                                    <img src="\( {image}" alt=" \){item.title}">
-                                    <div class="content">
-                                        <h2 class="title">${item.title}</h2>
-                                        <p class="summary">${(item.description || '').replace(/<[^>]+>/g, '').substring(0, 160)}...</p>
-                                        <a href="${item.link}" target="_blank" class="read-more">Read Full Article →</a>
-                                    </div>
-                                </div>`;
-                        });
-                    }
-                } catch(e) {}
+                for (let url of feeds) {
+                    try {
+                        const res = await fetch(`https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(url)}`);
+                        const data = await res.json();
+
+                        if (data.items) {
+                            data.items.slice(0, 5).forEach(item => {
+                                const img = item.enclosure ? item.enclosure.link : 'https://picsum.photos/600/300?random=' + Math.random();
+                                html += `
+                                    <div class="article">
+                                        <img src="\( {img}" alt=" \){item.title}">
+                                        <div class="content">
+                                            <h2 class="title">${item.title}</h2>
+                                            <p class="summary">${(item.description || 'Read more...').replace(/<[^>]+>/g, '').substring(0, 160)}...</p>
+                                            <a href="${item.link}" target="_blank" class="read-more">Read Full Article →</a>
+                                        </div>
+                                    </div>`;
+                            });
+                        }
+                    } catch(e) {}
+                }
+
+                container.innerHTML = html || '<div class="error">News feed temporarily unavailable. Please refresh.</div>';
+            } catch(e) {
+                container.innerHTML = '<div class="error">Unable to load news right now.<br>Please check your internet connection and refresh.</div>';
             }
-
-            document.getElementById('news-container').innerHTML = allHtml || 
-                '<p style="text-align:center; padding:40px;">Unable to load news right now.<br>Please refresh the page.</p>';
         }
 
-        // Load news when page opens
+        // Load the news
         loadNews();
     </script>
 </body>
