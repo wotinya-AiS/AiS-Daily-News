@@ -5,38 +5,51 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AiS Daily News</title>
     <style>
-        body { margin:0; padding:0; background:#0f0f0f; color:#eee; font-family:Arial,sans-serif; }
+        body { margin:0; padding:0; background:#0f0f0f; color:#eee; font-family:'Segoe UI',Arial,sans-serif; }
         header { background:#111; padding:25px; text-align:center; border-bottom:5px solid #0f0; }
         h1 { color:#0f0; font-size:2.5em; margin:0; }
-        .container { max-width:900px; margin:20px auto; padding:0 15px; }
-        .article { background:#1a1a1a; margin:20px 0; border-radius:10px; overflow:hidden; border:1px solid #333; }
-        .article img { width:100%; height:200px; object-fit:cover; }
-        .content { padding:15px; }
-        .title { color:#0f0; font-size:1.3em; margin-bottom:10px; }
-        .coffee { position:fixed; bottom:20px; right:20px; background:#FFDD00; color:black; padding:12px 20px; border-radius:30px; text-decoration:none; font-weight:bold; }
+        .subtitle { color:#aaa; margin-top:8px; }
+        .container { max-width:1000px; margin:0 auto; padding:20px; }
+        .article { background:#1a1a1a; margin-bottom:25px; border-radius:12px; overflow:hidden; border:1px solid #333; }
+        .article img { width:100%; height:230px; object-fit:cover; }
+        .content { padding:20px; }
+        .title { font-size:1.4em; margin-bottom:12px; color:#0f0; line-height:1.3; }
+        .summary { color:#ccc; line-height:1.6; margin-bottom:15px; }
+        .read-more { color:#0f0; text-decoration:none; font-weight:bold; }
+        .coffee { position:fixed; bottom:25px; right:25px; background:#FFDD00; color:#000; padding:15px 25px; border-radius:50px; text-decoration:none; font-weight:bold; box-shadow:0 5px 15px rgba(0,0,0,0.5); z-index:100; }
     </style>
 </head>
 <body>
     <header>
         <h1>📰 AiS Daily News</h1>
-        <p>Fresh headlines • Updated regularly</p>
+        <p class="subtitle">Fresh headlines from around the world • Updated regularly</p>
     </header>
 
     <div class="container">
         <div class="article">
-            <img src="https://picsum.photos/800/400?random=1" alt="">
+            <img src="https://picsum.photos/800/400?random=10" alt="News">
             <div class="content">
-                <h2 class="title">Major News Headline 1</h2>
-                <p>Summary of the first story goes here...</p>
-                <a href="#" style="color:#0f0;">Read more →</a>
+                <h2 class="title">David Sullivan banned from contact with West Ham women's and youth teams since 2023</h2>
+                <p class="summary">The decision followed a safeguarding investigation opened by the Football Association. The club have been informed of the ban.</p>
+                <a href="https://www.bbc.com/sport" target="_blank" class="read-more">Read Full Article →</a>
             </div>
         </div>
+
         <div class="article">
-            <img src="https://picsum.photos/800/400?random=2" alt="">
+            <img src="https://picsum.photos/800/400?random=20" alt="News">
             <div class="content">
-                <h2 class="title">Major News Headline 2</h2>
-                <p>Summary of the second story goes here...</p>
-                <a href="#" style="color:#0f0;">Read more →</a>
+                <h2 class="title">Trump says Iran shot down US helicopter and vows to respond</h2>
+                <p class="summary">Two crew members of the Apache helicopter that crashed were rescued by an American sea drone following the incident.</p>
+                <a href="https://www.reuters.com" target="_blank" class="read-more">Read Full Article →</a>
+            </div>
+        </div>
+
+        <div class="article">
+            <img src="https://picsum.photos/800/400?random=30" alt="News">
+            <div class="content">
+                <h2 class="title">Global markets react to latest economic developments</h2>
+                <p class="summary">Major stock indices showed mixed performance as investors weigh new policy announcements from central banks.</p>
+                <a href="https://www.nytimes.com" target="_blank" class="read-more">Read Full Article →</a>
             </div>
         </div>
     </div>
