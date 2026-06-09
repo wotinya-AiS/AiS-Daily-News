@@ -107,16 +107,15 @@
                     const res = await fetch(`https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(url)}`);
                     const data = await res.json();
 
-                    if (data.items) {
+                    if (data.items && data.items.length > 0) {
                         data.items.slice(0, 6).forEach(item => {
-                            const image = item.enclosure ? item.enclosure.link : 
-                                         (item.thumbnail ? item.thumbnail : 'https://via.placeholder.com/600x300/1a1a1a/0f0?text=News');
+                            const image = item.enclosure?.link || item.thumbnail || 'https://via.placeholder.com/600x300/1a1a1a/0f0?text=News';
                             allHtml += `
                                 <div class="article">
                                     <img src="\( {image}" alt=" \){item.title}">
                                     <div class="content">
                                         <h2 class="title">${item.title}</h2>
-                                        <p class="summary">${item.description ? item.description.replace(/<[^>]+>/g, '').substring(0, 160) + '...' : 'Read more on the original site.'}</p>
+                                        <p class="summary">${(item.description || '').replace(/<[^>]+>/g, '').substring(0, 160)}...</p>
                                         <a href="${item.link}" target="_blank" class="read-more">Read Full Article →</a>
                                     </div>
                                 </div>`;
@@ -125,7 +124,8 @@
                 } catch(e) {}
             }
 
-            document.getElementById('news-container').innerHTML = allHtml || '<p style="text-align:center; padding:40px;">Unable to load news right now. Please check your connection.</p>';
+            document.getElementById('news-container').innerHTML = allHtml || 
+                '<p style="text-align:center; padding:40px;">Unable to load news right now.<br>Please refresh the page.</p>';
         }
 
         // Load news when page opens
