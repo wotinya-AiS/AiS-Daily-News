@@ -17,65 +17,52 @@
         .summary { color:#ccc; line-height:1.6; margin-bottom:15px; }
         .read-more { color:#0f0; text-decoration:none; font-weight:bold; }
         .coffee { position:fixed; bottom:25px; right:25px; background:#FFDD00; color:#000; padding:15px 25px; border-radius:50px; text-decoration:none; font-weight:bold; box-shadow:0 5px 15px rgba(0,0,0,0.5); z-index:100; }
-        .loading { text-align:center; padding:60px; color:#888; font-size:1.1em; }
     </style>
 </head>
 <body>
     <header>
         <h1>📰 AiS Daily News</h1>
-        <p class="subtitle">Fresh headlines from around the world • Updated automatically on every refresh</p>
+        <p class="subtitle">Fresh headlines from around the world</p>
     </header>
 
-    <div class="container" id="news-container">
-        <div class="loading">Loading latest news...</div>
+    <div class="container">
+        <div class="article">
+            <img src="https://picsum.photos/id/1015/800/400" alt="Football">
+            <div class="content">
+                <h2 class="title">David Sullivan banned from contact with West Ham women's and youth teams since 2023</h2>
+                <p class="summary">The decision followed a safeguarding investigation opened by the Football Association. The club have been informed of the ban.</p>
+                <a href="https://www.bbc.com/sport" target="_blank" class="read-more">Read Full Article →</a>
+            </div>
+        </div>
+
+        <div class="article">
+            <img src="https://picsum.photos/id/1016/800/400" alt="Helicopter">
+            <div class="content">
+                <h2 class="title">Trump says Iran shot down US helicopter and vows to respond</h2>
+                <p class="summary">Two crew members of the Apache helicopter that crashed were rescued following the incident.</p>
+                <a href="https://www.reuters.com" target="_blank" class="read-more">Read Full Article →</a>
+            </div>
+        </div>
+
+        <div class="article">
+            <img src="https://picsum.photos/id/1074/800/400" alt="Economy">
+            <div class="content">
+                <h2 class="title">Global markets react to latest economic developments</h2>
+                <p class="summary">Major indices showed mixed performance as investors weigh new policy announcements from central banks.</p>
+                <a href="https://www.nytimes.com" target="_blank" class="read-more">Read Full Article →</a>
+            </div>
+        </div>
+
+        <div class="article">
+            <img src="https://picsum.photos/id/133/800/400" alt="Space">
+            <div class="content">
+                <h2 class="title">NASA announces new mission to study Earth's climate</h2>
+                <p class="summary">The new satellite will provide crucial data on climate change and extreme weather patterns.</p>
+                <a href="https://www.nasa.gov" target="_blank" class="read-more">Read Full Article →</a>
+            </div>
+        </div>
     </div>
 
     <a href="https://www.buymeacoffee.com/ais123" target="_blank" class="coffee">☕ Support AiS</a>
-
-    <script>
-        async function loadNews() {
-            const container = document.getElementById('news-container');
-            container.innerHTML = '<div class="loading">Loading latest news from multiple sources...</div>';
-
-            const feeds = [
-                "https://feeds.bbci.co.uk/news/rss.xml",
-                "https://rss.nytimes.com/services/xml/rss/nyt/World.xml",
-                "https://techcrunch.com/feed/"
-            ];
-
-            let html = '';
-
-            for (let url of feeds) {
-                try {
-                    const res = await fetch(`https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(url)}&count=8`);
-                    const data = await res.json();
-
-                    if (data.items && data.items.length > 0) {
-                        data.items.slice(0, 5).forEach((item, index) => {
-                            const img = item.enclosure?.link || item.thumbnail || `https://picsum.photos/800/400?random=${Date.now() + index}`;
-                            html += `
-                                <div class="article">
-                                    <img src="\( {img}" alt=" \){item.title}">
-                                    <div class="content">
-                                        <h2 class="title">${item.title}</h2>
-                                        <p class="summary">${(item.description || 'Read the full story on the original website.').replace(/<[^>]+>/g, '').substring(0, 165)}...</p>
-                                        <a href="${item.link}" target="_blank" class="read-more">Read Full Article →</a>
-                                    </div>
-                                </div>`;
-                        });
-                    }
-                } catch(e) {}
-            }
-
-            if (html) {
-                container.innerHTML = html;
-            } else {
-                container.innerHTML = `<div class="loading">News is temporarily unavailable.<br>Please refresh the page again.</div>`;
-            }
-        }
-
-        // Load fresh news every time the page loads/refreshes
-        loadNews();
-    </script>
 </body>
 </html>
