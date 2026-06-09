@@ -3,226 +3,133 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Snake Game</title>
+    <title>AiS Daily News</title>
     <style>
         body {
             margin: 0;
             padding: 0;
+            background: #0f0f0f;
+            color: #eee;
+            font-family: 'Segoe UI', Arial, sans-serif;
+        }
+        header {
             background: #111;
+            padding: 20px;
+            text-align: center;
+            border-bottom: 4px solid #0f0;
+        }
+        h1 {
+            margin: 0;
             color: #0f0;
-            font-family: 'Courier New', monospace;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            min-height: 100vh;
-            touch-action: none;
+            font-size: 2.2em;
         }
-        canvas {
-            border: 4px solid #0f0;
-            image-rendering: pixelated;
-            background: #000;
-            max-width: 100%;
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
         }
-        .controls {
-            margin: 15px 0;
-            display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
-            justify-content: center;
+        .article {
+            background: #1a1a1a;
+            margin-bottom: 25px;
+            border-radius: 12px;
+            overflow: hidden;
+            border: 1px solid #333;
         }
-        button {
-            background: #0f0;
-            color: #000;
-            border: none;
-            padding: 10px 16px;
-            font-size: 16px;
-            cursor: pointer;
+        .article img {
+            width: 100%;
+            height: 220px;
+            object-fit: cover;
+        }
+        .content {
+            padding: 18px;
+        }
+        .title {
+            font-size: 1.35em;
+            margin: 0 0 12px 0;
+            line-height: 1.3;
+            color: #0f0;
+        }
+        .summary {
+            color: #ccc;
+            line-height: 1.6;
+            margin-bottom: 12px;
+        }
+        .read-more {
+            color: #0f0;
+            text-decoration: none;
             font-weight: bold;
-            border-radius: 4px;
         }
-        button:hover { background: #0c0; }
-        .coffee-btn {
+        .coffee {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
             background: #FFDD00;
             color: #000;
-            font-size: 18px;
-            padding: 12px 20px;
-            margin-top: 10px;
+            padding: 14px 24px;
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: bold;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.4);
+            z-index: 100;
         }
-        .info {
-            margin: 8px;
+        .loading {
             text-align: center;
+            padding: 40px;
+            color: #888;
         }
     </style>
 </head>
 <body>
-    <h1>🐍 Snake Game</h1>
-    <div class="info">
-        <span id="score">Score: 0</span> | 
-        <span id="highscore">High: 0</span>
-    </div>
-    <canvas id="game" width="640" height="480"></canvas>
-    
-    <div class="controls">
-        <button onclick="setDifficulty(8)">Easy</button>
-        <button onclick="setDifficulty(12)">Medium</button>
-        <button onclick="setDifficulty(18)">Hard</button>
-        <button onclick="setDifficulty(25)">Insane</button>
-        <button onclick="togglePause()">Pause</button>
-        <button onclick="resetGame()">Restart</button>
+    <header>
+        <h1>📰 AiS Daily News</h1>
+        <p>Fresh headlines from around the world • Updated automatically</p>
+    </header>
+
+    <div class="container" id="news-container">
+        <div class="loading">Loading latest news...</div>
     </div>
 
-    <a href="https://buymeacoffee.com/" target="_blank">
-        <button class="coffee-btn">☕ Buy Me a Coffee</button>
-    </a>
-
-    <div class="info" style="margin-top:10px;">
-        <small>Use arrow keys or swipe • Eat red food • Don't hit yourself</small>
-    </div>
+    <a href="https://www.buymeacoffee.com/ais123" target="_blank" class="coffee">☕ Support AiS</a>
 
     <script>
-        const canvas = document.getElementById('game');
-        const ctx = canvas.getContext('2d');
-        const scoreEl = document.getElementById('score');
-        const highscoreEl = document.getElementById('highscore');
+        async function loadNews() {
+            const feeds = [
+                "https://feeds.bbci.co.uk/news/rss.xml",
+                "https://rss.nytimes.com/services/xml/rss/nyt/World.xml",
+                "https://techcrunch.com/feed/",
+                "https://rss.reuters.com/rss/worldNews"
+            ];
 
-        const GRID = 20;
-        const WIDTH = canvas.width / GRID;
-        const HEIGHT = canvas.height / GRID;
+            let allHtml = '';
 
-        let snake, food, dx, dy, score, highScore, gameInterval, speed = 12, paused = false;
+            for (let url of feeds) {
+                try {
+                    const res = await fetch(`https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(url)}`);
+                    const data = await res.json();
 
-        function initGame() {
-            snake = [{x: 10, y: 10}];
-            dx = 1; dy = 0;
-            score = 0;
-            placeFood();
-            updateScore();
-            if (gameInterval) clearInterval(gameInterval);
-            gameInterval = setInterval(gameLoop, 1000 / speed);
-        }
-
-        function placeFood() {
-            food = { x: Math.floor(Math.random() * WIDTH), y: Math.floor(Math.random() * HEIGHT) };
-            for (let segment of snake) {
-                if (segment.x === food.x && segment.y === food.y) return placeFood();
-            }
-        }
-
-        function updateScore() {
-            scoreEl.textContent = `Score: ${score}`;
-            const saved = localStorage.getItem('snakeHighScore') || 0;
-            highScore = Math.max(score, parseInt(saved));
-            highscoreEl.textContent = `High: ${highScore}`;
-            localStorage.setItem('snakeHighScore', highScore);
-        }
-
-        function gameLoop() {
-            if (paused) return;
-
-            const head = { x: snake[0].x + dx, y: snake[0].y + dy };
-
-            head.x = (head.x + WIDTH) % WIDTH;
-            head.y = (head.y + HEIGHT) % HEIGHT;
-
-            if (snake.some(segment => segment.x === head.x && segment.y === head.y)) {
-                gameOver();
-                return;
+                    if (data.items) {
+                        data.items.slice(0, 6).forEach(item => {
+                            const image = item.enclosure ? item.enclosure.link : 
+                                         (item.thumbnail ? item.thumbnail : 'https://via.placeholder.com/600x300/1a1a1a/0f0?text=News');
+                            allHtml += `
+                                <div class="article">
+                                    <img src="\( {image}" alt=" \){item.title}">
+                                    <div class="content">
+                                        <h2 class="title">${item.title}</h2>
+                                        <p class="summary">${item.description ? item.description.replace(/<[^>]+>/g, '').substring(0, 160) + '...' : 'Read more on the original site.'}</p>
+                                        <a href="${item.link}" target="_blank" class="read-more">Read Full Article →</a>
+                                    </div>
+                                </div>`;
+                        });
+                    }
+                } catch(e) {}
             }
 
-            snake.unshift(head);
-
-            if (head.x === food.x && head.y === food.y) {
-                score += 10;
-                updateScore();
-                placeFood();
-            } else {
-                snake.pop();
-            }
-
-            draw();
+            document.getElementById('news-container').innerHTML = allHtml || '<p style="text-align:center; padding:40px;">Unable to load news right now. Please check your connection.</p>';
         }
 
-        function draw() {
-            ctx.fillStyle = '#000';
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-            ctx.strokeStyle = '#222';
-            for (let i = 0; i <= WIDTH; i++) {
-                ctx.beginPath(); ctx.moveTo(i*GRID, 0); ctx.lineTo(i*GRID, canvas.height); ctx.stroke();
-            }
-            for (let i = 0; i <= HEIGHT; i++) {
-                ctx.beginPath(); ctx.moveTo(0, i*GRID); ctx.lineTo(canvas.width, i*GRID); ctx.stroke();
-            }
-
-            ctx.fillStyle = '#0f0';
-            snake.forEach((segment, i) => {
-                ctx.fillRect(segment.x * GRID + 1, segment.y * GRID + 1, GRID - 2, GRID - 2);
-                if (i === 0) {
-                    ctx.fillStyle = '#0f8';
-                    ctx.fillRect(segment.x * GRID + 4, segment.y * GRID + 4, GRID - 8, GRID - 8);
-                    ctx.fillStyle = '#0f0';
-                }
-            });
-
-            ctx.fillStyle = '#f00';
-            ctx.fillRect(food.x * GRID + 3, food.y * GRID + 3, GRID - 6, GRID - 6);
-        }
-
-        function gameOver() {
-            clearInterval(gameInterval);
-            alert(`Game Over! Score: ${score}\nHigh Score: ${highScore}\n\nPress OK to restart`);
-            resetGame();
-        }
-
-        function resetGame() {
-            paused = false;
-            initGame();
-        }
-
-        function setDifficulty(newSpeed) {
-            speed = newSpeed;
-            if (gameInterval) {
-                clearInterval(gameInterval);
-                gameInterval = setInterval(gameLoop, 1000 / speed);
-            }
-        }
-
-        function togglePause() {
-            paused = !paused;
-        }
-
-        document.addEventListener('keydown', e => {
-            if (paused) return;
-            switch(e.key) {
-                case 'ArrowUp': if (dy !== 1) {dx=0; dy=-1;} break;
-                case 'ArrowDown': if (dy !== -1) {dx=0; dy=1;} break;
-                case 'ArrowLeft': if (dx !== 1) {dx=-1; dy=0;} break;
-                case 'ArrowRight': if (dx !== -1) {dx=1; dy=0;} break;
-                case 'p': case 'P': togglePause(); break;
-                case 'r': case 'R': resetGame(); break;
-            }
-        });
-
-        let touchStartX = 0, touchStartY = 0;
-        canvas.addEventListener('touchstart', e => {
-            touchStartX = e.changedTouches[0].screenX;
-            touchStartY = e.changedTouches[0].screenY;
-        });
-        canvas.addEventListener('touchend', e => {
-            if (paused) return;
-            const diffX = e.changedTouches[0].screenX - touchStartX;
-            const diffY = e.changedTouches[0].screenY - touchStartY;
-            if (Math.abs(diffX) > Math.abs(diffY)) {
-                if (diffX > 30 && dx !== -1) { dx = 1; dy = 0; }
-                else if (diffX < -30 && dx !== 1) { dx = -1; dy = 0; }
-            } else {
-                if (diffY > 30 && dy !== -1) { dx = 0; dy = 1; }
-                else if (diffY < -30 && dy !== 1) { dx = 0; dy = -1; }
-            }
-        });
-
-        initGame();
+        // Load news when page opens
+        loadNews();
     </script>
 </body>
 </html>
